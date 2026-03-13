@@ -2,6 +2,8 @@
 // These are for my own sanity
 // And because of my own Autism
 
+#pragma once
+
 #include <cstddef>
 #include <cstdint>
 

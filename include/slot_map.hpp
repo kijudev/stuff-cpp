@@ -11,6 +11,8 @@
 // Future design:
 //      - templated handle: type safety if needed
 
+#pragma once
+
 #include <format>
 #include <string>
 #include <vector>
