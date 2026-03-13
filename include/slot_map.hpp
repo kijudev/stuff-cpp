@@ -8,6 +8,8 @@
 // incremented. That way we can know if any handle is valid at any time - we can check it
 // agaist the current state of the SlotMap, If generation counts match, it is a valid
 // handle, if not it is invalid.
+// Future design:
+//      - templated handle: type safety if needed
 
 #include <format>
 #include <string>
@@ -36,8 +38,8 @@ class SlotMap {
    public:
     Handle handout();
     void release(Handle handle);
-    bool check(Handle handle);
-    USize size();
+    bool check(Handle handle) const;
+    USize size() const;
 
    private:
     std::vector<U32> m_slots { 0 };
@@ -57,7 +59,7 @@ inline std::string Handle::format() const {
 }
 
 inline Handle SlotMap::handout() {
-    if (m_free.size() == 0) {
+    if (m_free.empty()) {
         Handle h {
             .idx = static_cast<U32>(m_slots.size()),
             .gen = 1,
@@ -70,8 +72,7 @@ inline Handle SlotMap::handout() {
         m_free.pop_back();
 
         U32& slot = m_slots[idx];
-        slot &= 0xFFFFFFFE;
-        slot += 2;
+        slot += 3;
 
         return {
             .idx = idx,
@@ -83,16 +84,16 @@ inline Handle SlotMap::handout() {
 inline void SlotMap::release(Handle handle) {
     if (!check(handle)) return;
 
-    m_slots[handle.idx] |= 1;
+    m_slots[handle.idx] &= 0xFFFFFFFE;
     m_free.push_back(handle.idx);
 }
 
-inline bool SlotMap::check(Handle handle) {
+inline bool SlotMap::check(Handle handle) const {
     if (handle.is_nil()) return false;
     if (static_cast<USize>(handle.idx) >= m_slots.size()) return false;
     if (handle.gen != m_slots[handle.idx]) return false;
     return true;
 }
 
-inline USize SlotMap::size() { return m_slots.size() - m_free.size() - 1; }
+inline USize SlotMap::size() const { return m_slots.size() - m_free.size() - 1; }
 }  // namespace ecs
