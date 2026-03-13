@@ -20,7 +20,6 @@
 #include "typedefs.hpp"
 
 namespace ecs {
-
 struct Handle {
     U32 idx { 0 };
     U32 gen { 0 };
