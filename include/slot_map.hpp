@@ -19,21 +19,23 @@
 
 #include "typedefs.hpp"
 
-namespace ecs {
+namespace ecs::impl {
+
+// =========================================================================================
+// Declaration
+// =========================================================================================
+
 struct Handle {
     U32 idx { 0 };
     U32 gen { 0 };
 
-    static Handle nil();
-    bool is_nil() const;
     bool operator==(Handle other) const;
     std::string format() const;
 };
 
-constexpr Handle nil_handle = {
-    .idx = 0,
-    .gen = 0,
-};
+constexpr U32 NIL_HANDLE_IDX = 0;
+constexpr U32 NIL_HANDLE_GEN = 0;
+constexpr Handle NIL_HANDLE  = { .idx = NIL_HANDLE_IDX, .gen = NIL_HANDLE_GEN };
 
 class SlotMap {
    public:
@@ -43,13 +45,13 @@ class SlotMap {
     USize size() const;
 
    private:
-    std::vector<U32> m_slots { 0 };
+    std::vector<U32> m_slots { NIL_HANDLE_GEN };
     std::vector<U32> m_free {};
 };
 
-inline Handle Handle::nil() { return nil_handle; }
-
-inline bool Handle::is_nil() const { return *this == nil_handle; }
+// =========================================================================================
+// Implementation
+// =========================================================================================
 
 inline bool Handle::operator==(Handle other) const {
     return idx == other.idx && gen == other.gen;
@@ -90,11 +92,11 @@ inline void SlotMap::release(Handle handle) {
 }
 
 inline bool SlotMap::check(Handle handle) const {
-    if (handle.is_nil()) return false;
+    if (handle == NIL_HANDLE) return false;
     if (static_cast<USize>(handle.idx) >= m_slots.size()) return false;
     if (handle.gen != m_slots[handle.idx]) return false;
     return true;
 }
 
 inline USize SlotMap::size() const { return m_slots.size() - m_free.size() - 1; }
-}  // namespace ecs
+}  // namespace ecs::impl
