@@ -42,6 +42,8 @@ class SlotMap {
     Handle handout();
     void release(Handle handle);
     bool check(Handle handle) const;
+    Handle handle(U32 idx) const;
+    bool alive(U32 idx) const;
     USize size() const;
 
    private:
@@ -96,6 +98,16 @@ inline bool SlotMap::check(Handle handle) const {
     if (static_cast<USize>(handle.idx) >= m_slots.size()) return false;
     if (handle.gen != m_slots[handle.idx]) return false;
     return true;
+}
+
+inline Handle SlotMap::handle(U32 idx) const {
+    if (static_cast<USize>(idx) >= m_slots.size()) return NIL_HANDLE;
+    return { .idx = idx, .gen = m_slots[idx] };
+}
+
+inline bool SlotMap::alive(U32 idx) const {
+    if (static_cast<USize>(idx) >= m_slots.size()) return false;
+    return (m_slots[idx] & 1u) != 0u;
 }
 
 inline USize SlotMap::size() const { return m_slots.size() - m_free.size() - 1; }
