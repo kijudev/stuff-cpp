@@ -95,8 +95,10 @@ inline void SlotMap::release(Handle handle) {
 
 inline bool SlotMap::check(Handle handle) const {
     if (handle == NIL_HANDLE) return false;
+    if (!alive(handle.idx)) return false;
     if (static_cast<USize>(handle.idx) >= m_slots.size()) return false;
     if (handle.gen != m_slots[handle.idx]) return false;
+
     return true;
 }
 

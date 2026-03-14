@@ -28,6 +28,10 @@ struct Dead {
     std::string format() const { return std::format("Dead"); }
 };
 
+struct Player {
+    std::string name { "player" };
+};
+
 int main() {
     ecs::Stuff stuff;
 
@@ -47,7 +51,12 @@ int main() {
     stuff.attach_part<Health>(c, { .value = 42.0f });
     stuff.attach_part<Dead>(c, {});
 
-    auto q = stuff.query<Pos, const Health>().with<Vel>().without<Dead>().get();
+    auto q = stuff.query<Pos, const Health>()
+                 .with<Vel, Dead>()
+                 .without<Dead>()
+                 .with<Dead>()
+                 .get();
+
     for (auto [thing, pos, health] : q) {
         pos.x += 10.0f;
         pos.y += 1.0f;
@@ -58,5 +67,13 @@ int main() {
     auto q2 = stuff.query<const Pos>().get();
     for (auto [thing, pos] : q2) {
         std::println("thing {}.{} pos {}", thing.idx, thing.gen, pos.format());
+    }
+
+    ecs::Thing player = stuff.create_thing();
+    stuff.attach_part(player, Player { .name = "Dynks" });
+    stuff.attach_part(player, Pos { .x = 1.0f, .y = 1.0f });
+
+    for (auto [_, player] : stuff.query<Player>().get()) {
+        std::println("{}", player.name);
     }
 }
