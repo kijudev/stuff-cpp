@@ -36,7 +36,7 @@ class SparseSet : public SparseSetI {
     template <typename... Args>
     void emplace(Thing thing, Args&&... args) {
         if (contains(thing)) {
-            U32 existing_idx = m_sparse[thing.idx];
+            U32 existing_idx           = m_sparse[thing.idx];
             m_dense_data[existing_idx] = T(std::forward<Args>(args)...);
             return;
         }
@@ -44,7 +44,7 @@ class SparseSet : public SparseSetI {
             m_sparse.resize(thing.idx + 1);
         }
 
-        U32 dense_idx = m_dense_data.size();
+        U32 dense_idx       = m_dense_data.size();
         m_sparse[thing.idx] = dense_idx;
         m_dense_idxs.push_back(thing.idx);
         m_dense_data.emplace_back(std::forward<Args>(args)...);
@@ -60,7 +60,7 @@ class SparseSet : public SparseSetI {
             m_dense_data[curr_dense_idx] = std::move(m_dense_data[last_dense_idx]);
             m_dense_idxs[curr_dense_idx] = m_dense_idxs[last_dense_idx];
 
-            U32 moved_thing_idx = m_dense_idxs[curr_dense_idx];
+            U32 moved_thing_idx       = m_dense_idxs[curr_dense_idx];
             m_sparse[moved_thing_idx] = curr_dense_idx;
         }
 
@@ -84,4 +84,4 @@ class SparseSet : public SparseSetI {
     std::vector<U32> m_dense_idxs { 0 };
     std::vector<T> m_dense_data { T() };
 };
-}  // namespace ecs
+}  // namespace ecs::impl
